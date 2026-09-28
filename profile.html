@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile · SoulBridge Connection</title>
+  <meta name="theme-color" content="#c44569">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💞</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .profile-wrap {
+      max-width: 640px;
+      margin: 40px auto;
+    }
+    .hero-photo {
+      aspect-ratio: 4/5;
+      max-height: 520px;
+      background: linear-gradient(145deg, #f7ecf2, #ead8e2);
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      color: #9b6f86;
+      box-shadow: 0 12px 40px rgba(196, 69, 105, 0.15);
+      position: relative;
+    }
+    .hero-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .hero-photo .verified-pill {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(30, 136, 229, 0.95);
+      color: #fff;
+      padding: 5px 12px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 2px solid #fff;
+      letter-spacing: 0.3px;
+    }
+    .hero-photo .online-dot {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #28a745;
+      border: 3px solid #fff;
+      box-shadow: 0 0 12px rgba(40, 167, 69, 0.6);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.15); opacity: 0.75; }
+    }
+    .profile-name-block {
+      padding: 24px 4px 20px;
+    }
+    .profile-name-block h1 {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 2rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .profile-meta {
+      font-size: 0.95rem;
+      color: #7a5a6a;
+      margin-bottom: 4px;
+    }
+    .section {
+      padding: 22px 0;
+      border-top: 1px solid rgba(196, 69, 105, 0.12);
+    }
+    .section-title {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #c44569;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 14px;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .info-item {
+      font-size: 0.92rem;
+      color: #1a1a2e;
+    }
+    .info-item .label {
+      color: #999;
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    .info-item .value {
+      font-weight: 600;
+    }
+    .bio-text {
+      font-size: 0.98rem;
+      line-height: 1.7;
+      color: #3a2a34;
+      white-space: pre-wrap;
+    }
+    .interests-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .interest-chip {
+      padding: 7px 14px;
+      background: rgba(196, 69, 105, 0.08);
+      border: 1px solid rgba(196, 69, 105, 0.15);
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #a13253;
+    }
+    .page-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #7a5a6a;
+    }
+    .page-state .icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(196, 69, 105, 0.15);
+      border-top-color: #c44569;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin-bottom: 14px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #c44569;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    @media (max-width: 500px) {
+      .info-grid { grid-template-columns: 1fr; }
+      .profile-name-block h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="shell">
+      <a href="index.html" class="logo">SoulBridge Connection</a>
+      <nav class="site-nav">
+        <a href="members.html">Browse</a>
+        <a href="dashboard.html">Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+    <div class="shell">
+      <div class="profile-wrap">
+
+        <!-- Loading -->
+        <div id="loading" class="page-state">
+          <div class="spinner"></div>
+          <h2>Loading profile...</h2>
+        </div>
+
+        <!-- Error -->
+        <div id="error-state" class="page-state" style="display:none;">
+          <div class="icon">⚠️</div>
+          <h2 id="error-title">Profile not found</h2>
+          <p id="error-text">The link may be broken.</p>
+          <a href="members.html" class="btn" style="margin-top: 20px;">Back to Members</a>
+        </div>
+
+        <!-- Content -->
+        <div id="content" style="display:none;">
+          <a href="members.html" class="back-link">← Back to members</a>
+
+          <div class="hero-photo" id="hero-photo">👤</div>
+
+          <div class="profile-name-block">
+            <h1 id="profile-name">—</h1>
+            <div class="profile-meta" id="profile-location">📍 —</div>
+            <div class="profile-meta" id="profile-occupation">💼 —</div>
+          </div>
+
+          <!-- About -->
+          <div class="section">
+            <div class="section-title">About</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">Age</span>
+                <span class="value" id="info-age">—</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Gender</span>
+                <span class="value" id="info-gender">—</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Location</span>
+                <span class="value" id="info-location">—</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Country</span>
+                <span class="value" id="info-country">—</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Occupation</span>
+                <span class="value" id="info-occupation">—</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Looking For</span>
+                <span class="value" id="info-looking">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bio -->
+          <div class="section" id="bio-section" style="display:none;">
+            <div class="section-title">Bio</div>
+            <div class="bio-text" id="info-bio"></div>
+          </div>
+
+          <!-- Interests -->
+          <div class="section" id="interests-section" style="display:none;">
+            <div class="section-title">Interests</div>
+            <div class="interests-chips" id="info-interests"></div>
+          </div>
+
+          <!-- CTA -->
+          <div class="section" style="text-align:center; padding-top: 32px;">
+            <button class="btn btn-full" id="connect-btn" style="max-width: 300px; margin: 0 auto;">
+              💬 Request Connection
+            </button>
+            <p style="font-size: 0.85rem; color: #999; margin-top: 12px;">
+              Messaging coming soon
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="shell">
+      <p style="margin: 0;">&copy; 2026 SoulBridge Connection · Connecting hearts worldwide.</p>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- SCRIPT                                                        -->
+  <!-- ============================================================ -->
+  <script type="module">
+    import { getProfileById, getProfileBySlug } from "./js/profile.js";
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function capitalize(str) {
+      if (!str) return "";
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    }
+
+    function showError(title, text) {
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("content").style.display = "none";
+      const err = document.getElementById("error-state");
+      err.style.display = "block";
+      document.getElementById("error-title").textContent = title;
+      document.getElementById("error-text").textContent = text;
+    }
+
+    function renderProfile(profile) {
+      const name = profile.name || "Member";
+      const age = profile.age;
+      const location = profile.location || "Location unknown";
+      const country = profile.country || "—";
+      const occupation = profile.occupation || "—";
+      const gender = capitalize(profile.gender) || "—";
+      const lookingFor = profile.looking_for || "—";
+      const bio = profile.bio || "";
+      const interests = Array.isArray(profile.interests) ? profile.interests : [];
+      const verified = profile.verified === true;
+      const online = profile.online === true;
+
+      // Photo
+      const photoEl = document.getElementById("hero-photo");
+      if (profile.photo_url) {
+        photoEl.innerHTML = `<img src="${profile.photo_url}" alt="${escapeHtml(name)}">`;
+      } else {
+        photoEl.innerHTML = "👤";
+      }
+
+      // Badges
+      if (verified) {
+        photoEl.insertAdjacentHTML("beforeend", '<div class="verified-pill">✓ VERIFIED</div>');
+      }
+      if (online) {
+        photoEl.insertAdjacentHTML("beforeend", '<div class="online-dot"></div>');
+      }
+
+      // Name + subtitle
+      document.getElementById("profile-name").textContent =
+        `${name}${age ? ", " + age : ""}`;
+      document.getElementById("profile-location").textContent = `📍 ${location}`;
+      document.getElementById("profile-occupation").textContent =
+        occupation !== "—" ? `💼 ${occupation}` : "";
+
+      // Info grid
+      document.getElementById("info-age").textContent = age || "—";
+      document.getElementById("info-gender").textContent = gender;
+      document.getElementById("info-location").textContent = location;
+      document.getElementById("info-country").textContent = country;
+      document.getElementById("info-occupation").textContent = occupation;
+      document.getElementById("info-looking").textContent = lookingFor;
+
+      // Bio
+      if (bio) {
+        document.getElementById("info-bio").textContent = bio;
+        document.getElementById("bio-section").style.display = "block";
+      }
+
+      // Interests
+      if (interests.length > 0) {
+        document.getElementById("info-interests").innerHTML =
+          interests.map(i => `<span class="interest-chip">${escapeHtml(i)}</span>`).join("");
+        document.getElementById("interests-section").style.display = "block";
+      }
+
+      // Page title
+      document.title = `${name} · SoulBridge Connection`;
+
+      // Show content
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("error-state").style.display = "none";
+      document.getElementById("content").style.display = "block";
+
+      // Connect button — stub for now
+      document.getElementById("connect-btn").addEventListener("click", () => {
+        alert("Messaging coming soon! We'll notify you when this feature is ready.");
+      });
+    }
+
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      const slug = params.get("slug");
+
+      if (!id && !slug) {
+        showError("No profile specified", "Please select a member from the browse page.");
+        return;
+      }
+
+      try {
+        let profile = null;
+
+        if (id) {
+          profile = await getProfileById(id);
+        } else if (slug) {
+          profile = await getProfileBySlug(slug);
+        }
+
+        if (!profile) {
+          showError("Profile not found", "This member may have been removed or the link is wrong.");
+          return;
+        }
+
+        renderProfile(profile);
+      } catch (err) {
+        console.error(err);
+        showError("Error loading profile", err.message);
+      }
+    }
+
+    init();
+  </script>
+
+</body>
+</html>
