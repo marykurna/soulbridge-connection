@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Members · SoulBridge Connection</title>
+  <meta name="theme-color" content="#c44569">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💞</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .members-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .members-header h1 {
+      margin-bottom: 8px;
+    }
+    .members-header p {
+      color: #7a5a6a;
+    }
+    .members-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+    .member-card {
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.08);
+      border: 1px solid #f5e6ee;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .member-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px -12px rgba(196, 69, 105, 0.25);
+    }
+    .member-photo {
+      aspect-ratio: 4/5;
+      background: linear-gradient(145deg, #f7ecf2, #ead8e2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: #9b6f86;
+      overflow: hidden;
+      position: relative;
+    }
+    .member-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .member-photo .online-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #28a745;
+      border: 3px solid #fff;
+      box-shadow: 0 0 8px rgba(40, 167, 69, 0.6);
+    }
+    .member-photo .verified-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(30, 136, 229, 0.95);
+      color: #fff;
+      padding: 3px 8px;
+      border-radius: 50px;
+      font-size: 10px;
+      font-weight: 700;
+      border: 2px solid #fff;
+    }
+    .member-info {
+      padding: 16px 18px 20px;
+    }
+    .member-name {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .member-meta {
+      font-size: 0.85rem;
+      color: #7a5a6a;
+      margin-bottom: 8px;
+    }
+    .member-bio {
+      font-size: 0.9rem;
+      color: #4a4a5a;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #7a5a6a;
+    }
+    .empty-state .icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+    .loading-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #f5e6ee 0%, #fce8f0 50%, #f5e6ee 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 20px;
+      height: 380px;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="shell">
+      <a href="index.html" class="logo">SoulBridge Connection</a>
+      <nav class="site-nav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="#" id="logout-btn">Log Out</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+    <div class="shell" style="padding-top: 40px;">
+
+      <div class="members-header">
+        <h1>Discover Members</h1>
+        <p>Browse profiles and find someone special.</p>
+      </div>
+
+      <!-- Loading -->
+      <div id="loading" class="loading-grid">
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="empty-state" class="empty-state" style="display: none;">
+        <div class="icon">💫</div>
+        <h2>No members yet</h2>
+        <p>You're early! Invite friends or check back soon.</p>
+      </div>
+
+      <!-- Grid -->
+      <div id="members-grid" class="members-grid" style="display: none;"></div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="shell">
+      <p style="margin: 0;">&copy; 2026 SoulBridge Connection · Connecting hearts worldwide.</p>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- SCRIPT                                                        -->
+  <!-- ============================================================ -->
+  <script type="module">
+    import { requireAuth, logout } from "./js/auth.js";
+    import { getAllProfiles } from "./js/profile.js";
+
+    const loadingEl = document.getElementById("loading");
+    const gridEl = document.getElementById("members-grid");
+    const emptyEl = document.getElementById("empty-state");
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function memberCard(profile) {
+      const name = profile.name || "Member";
+      const age = profile.age ? `, ${profile.age}` : "";
+      const location = profile.location || "";
+      const bio = profile.bio || "";
+      const photoUrl = profile.photo_url;
+      const online = profile.online === true;
+      const verified = profile.verified === true;
+
+      const photoContent = photoUrl
+        ? `<img src="${photoUrl}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.parentElement.innerHTML='👤'">`
+        : `👤`;
+
+      const onlineBadge = online ? '<div class="online-badge"></div>' : '';
+      const verifiedBadge = verified ? '<div class="verified-badge">✓</div>' : '';
+
+      const memberUrl = profile.slug
+        ? `profile.html?slug=${encodeURIComponent(profile.slug)}`
+        : `profile.html?id=${profile.id}`;
+
+      return `
+        <a href="${memberUrl}" class="member-card">
+          <div class="member-photo">
+            ${photoContent}
+            ${onlineBadge}
+            ${verifiedBadge}
+          </div>
+          <div class="member-info">
+            <div class="member-name">${escapeHtml(name)}${age}</div>
+            ${location ? `<div class="member-meta">📍 ${escapeHtml(location)}</div>` : ''}
+            ${bio ? `<div class="member-bio">${escapeHtml(bio)}</div>` : ''}
+          </div>
+        </a>
+      `;
+    }
+
+    async function loadMembers() {
+      try {
+        const profiles = await getAllProfiles(60);
+
+        // Filter out nothing — show all profiles except ourselves
+        const { data: { user } } = await (await import("./js/supabase.js")).supabase.auth.getUser();
+        const others = profiles.filter(p => p.id !== user?.id);
+
+        loadingEl.style.display = "none";
+
+        if (others.length === 0) {
+          emptyEl.style.display = "block";
+          return;
+        }
+
+        gridEl.innerHTML = others.map(memberCard).join("");
+        gridEl.style.display = "grid";
+      } catch (err) {
+        console.error(err);
+        loadingEl.style.display = "none";
+        emptyEl.style.display = "block";
+        emptyEl.innerHTML = `
+          <div class="icon">⚠️</div>
+          <h2>Could not load members</h2>
+          <p>${escapeHtml(err.message)}</p>
+        `;
+      }
+    }
+
+    document.getElementById("logout-btn").addEventListener("click", (e) => {
+      e.preventDefault();
+      logout("index.html");
+    });
+
+    (async () => {
+      const session = await requireAuth("login.html");
+      if (session) loadMembers();
+    })();
+  </script>
+
+</body>
+</html>
