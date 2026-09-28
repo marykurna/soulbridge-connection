@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In · SoulBridge Connection</title>
+  <meta name="description" content="Log in to your SoulBridge Connection account.">
+  <meta name="theme-color" content="#c44569">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💞</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="shell">
+      <a href="index.html" class="logo">SoulBridge Connection</a>
+      <nav class="site-nav">
+        <a href="signup.html">Sign Up</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- LOGIN FORM -->
+  <main>
+    <div class="shell">
+      <div class="card auth-card">
+        <h1>Welcome Back</h1>
+        <p class="subtitle">Log in to continue your journey.</p>
+
+        <!-- ALERTS -->
+        <div id="alert-error" class="alert alert-error"></div>
+        <div id="alert-success" class="alert alert-success"></div>
+
+        <!-- FORM -->
+        <form id="login-form" novalidate>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-input"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            >
+            <span class="form-error" id="email-error">Please enter a valid email</span>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              placeholder="Your password"
+              autocomplete="current-password"
+              required
+            >
+            <span class="form-error" id="password-error">Please enter your password</span>
+          </div>
+
+          <button type="submit" class="btn btn-full" id="submit-btn">
+            Log In
+          </button>
+        </form>
+
+        <p class="footer-link">
+          Don't have an account? <a href="signup.html">Sign up</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="shell">
+      <p style="margin: 0;">&copy; 2026 SoulBridge Connection · Connecting hearts worldwide.</p>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- SCRIPT — login logic                                         -->
+  <!-- ============================================================ -->
+  <script type="module">
+    import { supabase } from "./js/supabase.js";
+
+    const form = document.getElementById("login-form");
+    const submitBtn = document.getElementById("submit-btn");
+    const errorBox = document.getElementById("alert-error");
+    const successBox = document.getElementById("alert-success");
+
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.add("show");
+      successBox.classList.remove("show");
+    }
+
+    function showSuccess(message) {
+      successBox.textContent = message;
+      successBox.classList.add("show");
+      errorBox.classList.remove("show");
+    }
+
+    function clearAlerts() {
+      errorBox.classList.remove("show");
+      successBox.classList.remove("show");
+    }
+
+    function validateForm() {
+      let valid = true;
+
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(emailInput.value.trim())) {
+        document.getElementById("email-error").classList.add("show");
+        valid = false;
+      } else {
+        document.getElementById("email-error").classList.remove("show");
+      }
+
+      if (!passwordInput.value) {
+        document.getElementById("password-error").classList.add("show");
+        valid = false;
+      } else {
+        document.getElementById("password-error").classList.remove("show");
+      }
+
+      return valid;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearAlerts();
+
+      if (!validateForm()) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Logging in...";
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (error) {
+          showError(error.message);
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Log In";
+          return;
+        }
+
+        showSuccess("Logged in! Redirecting...");
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 600);
+      } catch (err) {
+        console.error(err);
+        showError("Something went wrong. Please try again.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Log In";
+      }
+    });
+  </script>
+
+</body>
+</html>

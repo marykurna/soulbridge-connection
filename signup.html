@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account · SoulBridge Connection</title>
+  <meta name="description" content="Create your SoulBridge Connection account and start finding your perfect match.">
+  <meta name="theme-color" content="#c44569">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💞</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="shell">
+      <a href="index.html" class="logo">SoulBridge Connection</a>
+      <nav class="site-nav">
+        <a href="login.html">Log In</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- SIGNUP FORM -->
+  <main>
+    <div class="shell">
+      <div class="card auth-card">
+        <h1>Create Account</h1>
+        <p class="subtitle">Start finding your perfect match today.</p>
+
+        <!-- ALERTS -->
+        <div id="alert-error" class="alert alert-error"></div>
+        <div id="alert-success" class="alert alert-success"></div>
+
+        <!-- FORM -->
+        <form id="signup-form" novalidate>
+          <div class="form-group">
+            <label for="name">Your Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              class="form-input"
+              placeholder="e.g. Sam"
+              autocomplete="name"
+              required
+            >
+            <span class="form-error" id="name-error">Please enter your name</span>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-input"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            >
+            <span class="form-error" id="email-error">Please enter a valid email</span>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              placeholder="At least 6 characters"
+              autocomplete="new-password"
+              minlength="6"
+              required
+            >
+            <span class="form-error" id="password-error">Password must be at least 6 characters</span>
+          </div>
+
+          <button type="submit" class="btn btn-full" id="submit-btn">
+            Create Account
+          </button>
+        </form>
+
+        <p class="footer-link">
+          Already have an account? <a href="login.html">Log in</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="shell">
+      <p style="margin: 0;">&copy; 2026 SoulBridge Connection · Connecting hearts worldwide.</p>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- SCRIPT — signup logic                                        -->
+  <!-- ============================================================ -->
+  <script type="module">
+    import { supabase } from "./js/supabase.js";
+
+    const form = document.getElementById("signup-form");
+    const submitBtn = document.getElementById("submit-btn");
+    const errorBox = document.getElementById("alert-error");
+    const successBox = document.getElementById("alert-success");
+
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.add("show");
+      successBox.classList.remove("show");
+    }
+
+    function showSuccess(message) {
+      successBox.textContent = message;
+      successBox.classList.add("show");
+      errorBox.classList.remove("show");
+    }
+
+    function clearAlerts() {
+      errorBox.classList.remove("show");
+      successBox.classList.remove("show");
+    }
+
+    function validateForm() {
+      let valid = true;
+
+      // Name
+      if (!nameInput.value.trim()) {
+        document.getElementById("name-error").classList.add("show");
+        valid = false;
+      } else {
+        document.getElementById("name-error").classList.remove("show");
+      }
+
+      // Email
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(emailInput.value.trim())) {
+        document.getElementById("email-error").classList.add("show");
+        valid = false;
+      } else {
+        document.getElementById("email-error").classList.remove("show");
+      }
+
+      // Password
+      if (passwordInput.value.length < 6) {
+        document.getElementById("password-error").classList.add("show");
+        valid = false;
+      } else {
+        document.getElementById("password-error").classList.remove("show");
+      }
+
+      return valid;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearAlerts();
+
+      if (!validateForm()) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Creating account...";
+
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: { name: name }
+          }
+        });
+
+        if (error) {
+          showError(error.message);
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Create Account";
+          return;
+        }
+
+        // If email confirmation is on, session is null but user is created
+        if (data.user && !data.session) {
+          showSuccess(
+            "Account created! Check your email to confirm, then log in."
+          );
+          form.reset();
+        } else if (data.session) {
+          // Confirmation is off — user is logged in immediately
+          showSuccess("Account created! Redirecting...");
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 800);
+          return;
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Create Account";
+      } catch (err) {
+        console.error(err);
+        showError("Something went wrong. Please try again.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Create Account";
+      }
+    });
+  </script>
+
+</body>
+</html>

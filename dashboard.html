@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard · SoulBridge Connection</title>
+  <meta name="theme-color" content="#c44569">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💞</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="shell">
+      <a href="index.html" class="logo">SoulBridge Connection</a>
+      <nav class="site-nav">
+        <span id="nav-name" style="color: #7a5a6a; margin-right: 20px;"></span>
+        <a href="#" id="logout-btn">Log Out</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- DASHBOARD CONTENT -->
+  <main>
+    <div class="shell">
+      <div class="card" style="max-width: 720px; margin: 40px auto;">
+        <h1 id="welcome-heading">Welcome...</h1>
+        <p style="color: #7a5a6a;">
+          This is your private dashboard. You're logged in.
+        </p>
+
+        <div id="profile-info" style="margin-top: 24px;">
+          <p><strong>Email:</strong> <span id="user-email">—</span></p>
+          <p><strong>Name:</strong> <span id="user-name">—</span></p>
+          <p><strong>Member since:</strong> <span id="user-created">—</span></p>
+        </div>
+
+        <hr style="margin: 32px 0; border: none; border-top: 1px solid #f0e6ea;">
+
+        <h3 style="color: #c44569;">What's Next?</h3>
+        <p>Complete your profile to start finding matches.</p>
+
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
+          <a href="#" class="btn" style="opacity: 0.5; cursor: not-allowed;" onclick="event.preventDefault();">
+            Edit Profile (coming soon)
+          </a>
+          <a href="#" class="btn btn-outline" style="opacity: 0.5; cursor: not-allowed;" onclick="event.preventDefault();">
+            Browse Members (coming soon)
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="shell">
+      <p style="margin: 0;">&copy; 2026 SoulBridge Connection · Connecting hearts worldwide.</p>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- SCRIPT — dashboard logic                                     -->
+  <!-- ============================================================ -->
+  <script type="module">
+    import { requireAuth, getCurrentUser, logout } from "./js/auth.js";
+
+    async function init() {
+      // Redirect to login if not authenticated
+      const session = await requireAuth("login.html");
+      if (!session) return;
+
+      // Fetch the full user + profile
+      const result = await getCurrentUser();
+
+      if (!result) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const { user, profile } = result;
+
+      // Update the page with real data
+      const name = (profile && profile.name) || user.email.split("@")[0];
+      const email = user.email;
+      const createdAt = new Date(user.created_at).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+
+      document.getElementById("welcome-heading").textContent =
+        `Welcome, ${name}!`;
+      document.getElementById("nav-name").textContent = name;
+      document.getElementById("user-email").textContent = email;
+      document.getElementById("user-name").textContent = name;
+      document.getElementById("user-created").textContent = createdAt;
+    }
+
+    // Logout button
+    document.getElementById("logout-btn").addEventListener("click", (e) => {
+      e.preventDefault();
+      logout("index.html");
+    });
+
+    init();
+  </script>
+
+</body>
+</html>
