@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Profile · SoulBridge Connection</title>
+  <meta name="theme-color" content="#c44569">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💞</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .profile-edit-card {
+      max-width: 640px;
+      margin: 40px auto;
+    }
+    .photo-upload-area {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 24px;
+      padding: 20px;
+      background: rgba(247, 38, 109, 0.04);
+      border: 1.5px dashed rgba(196, 69, 105, 0.3);
+      border-radius: 16px;
+    }
+    .photo-preview {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #f7ecf2, #ead8e2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #9b6f86;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 3px solid #fff;
+      box-shadow: 0 4px 12px rgba(196, 69, 105, 0.15);
+    }
+    .photo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .photo-upload-info {
+      flex: 1;
+    }
+    .photo-upload-info p {
+      margin: 0 0 8px 0;
+      font-size: 0.9rem;
+      color: #7a5a6a;
+    }
+    .photo-input {
+      display: none;
+    }
+    .photo-upload-btn {
+      display: inline-block;
+      padding: 8px 18px;
+      background: #fff;
+      color: #c44569;
+      border: 1.5px solid #c44569;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .photo-upload-btn:hover {
+      background: #c44569;
+      color: #fff;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .interests-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .chip-toggle {
+      padding: 8px 14px;
+      background: #fff;
+      border: 1.5px solid #f0e6ea;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #4a4a5a;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .chip-toggle:hover {
+      border-color: #c44569;
+      color: #c44569;
+    }
+    .chip-toggle.active {
+      background: #c44569;
+      border-color: #c44569;
+      color: #fff;
+    }
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+    .form-actions .btn {
+      flex: 1;
+      min-width: 140px;
+    }
+    textarea.form-input {
+      min-height: 100px;
+      resize: vertical;
+      font-family: inherit;
+    }
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .photo-upload-area { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="shell">
+      <a href="index.html" class="logo">SoulBridge Connection</a>
+      <nav class="site-nav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="#" id="logout-btn">Log Out</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+    <div class="shell">
+      <div class="card profile-edit-card">
+        <h1>Edit Your Profile</h1>
+        <p class="subtitle" style="color: #7a5a6a; margin-bottom: 24px;">
+          This is what other members will see.
+        </p>
+
+        <div id="alert-error" class="alert alert-error"></div>
+        <div id="alert-success" class="alert alert-success"></div>
+
+        <form id="profile-form" novalidate>
+
+          <!-- PHOTO -->
+          <div class="photo-upload-area">
+            <div class="photo-preview" id="photo-preview">📷</div>
+            <div class="photo-upload-info">
+              <p><strong>Profile photo</strong></p>
+              <p>JPG or PNG, up to 5MB.</p>
+              <label for="photo-input" class="photo-upload-btn">
+                Choose Photo
+              </label>
+              <input type="file" id="photo-input" class="photo-input" accept="image/*">
+            </div>
+          </div>
+
+          <!-- NAME -->
+          <div class="form-group">
+            <label for="name">Display Name *</label>
+            <input type="text" id="name" class="form-input" placeholder="e.g. Sam" required>
+          </div>
+
+          <!-- AGE + GENDER -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="age">Age</label>
+              <input type="number" id="age" class="form-input" placeholder="e.g. 28" min="18" max="120">
+            </div>
+            <div class="form-group">
+              <label for="gender">Gender</label>
+              <select id="gender" class="form-input">
+                <option value="">Prefer not to say</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="non-binary">Non-binary</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- LOCATION + COUNTRY -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="location">Current Location</label>
+              <input type="text" id="location" class="form-input" placeholder="e.g. Nairobi, Kenya">
+            </div>
+            <div class="form-group">
+              <label for="country">Home Country</label>
+              <input type="text" id="country" class="form-input" placeholder="e.g. Kenya">
+            </div>
+          </div>
+
+          <!-- OCCUPATION + LOOKING FOR -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="occupation">Occupation</label>
+              <input type="text" id="occupation" class="form-input" placeholder="e.g. Teacher">
+            </div>
+            <div class="form-group">
+              <label for="looking_for">Looking For</label>
+              <select id="looking_for" class="form-input">
+                <option value="">Select...</option>
+                <option value="Serious Relationship">Serious Relationship</option>
+                <option value="Friendship">Friendship</option>
+                <option value="Casual Dating">Casual Dating</option>
+                <option value="Marriage">Marriage</option>
+                <option value="Companionship">Companionship</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- BIO -->
+          <div class="form-group">
+            <label for="bio">About Me</label>
+            <textarea id="bio" class="form-input" placeholder="Tell us about yourself..." maxlength="500"></textarea>
+            <p style="font-size: 0.8rem; color: #999; margin-top: 4px;">
+              <span id="bio-count">0</span>/500 characters
+            </p>
+          </div>
+
+          <!-- INTERESTS -->
+          <div class="form-group">
+            <label>Interests</label>
+            <p style="font-size: 0.85rem; color: #7a5a6a; margin-bottom: 8px;">
+              Tap to select what you enjoy.
+            </p>
+            <div class="interests-chips" id="interests-chips">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+
+          <!-- ACTIONS -->
+          <div class="form-actions">
+            <a href="dashboard.html" class="btn btn-outline">Cancel</a>
+            <button type="submit" class="btn" id="save-btn">Save Profile</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="shell">
+      <p style="margin: 0;">&copy; 2026 SoulBridge Connection · Connecting hearts worldwide.</p>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- SCRIPT                                                        -->
+  <!-- ============================================================ -->
+  <script type="module">
+    import { requireAuth, logout } from "./js/auth.js";
+    import { getMyProfile, updateMyProfile, uploadProfilePhoto } from "./js/profile.js";
+
+    // ---------- Interest options ----------
+    const INTEREST_OPTIONS = [
+      "Travel", "Music", "Reading", "Cooking", "Fitness",
+      "Movies", "Photography", "Art", "Dancing", "Sports",
+      "Hiking", "Coffee", "Pets", "Gaming", "Nature",
+      "Writing", "Fashion", "Yoga", "Volunteering", "Technology"
+    ];
+
+    // ---------- DOM refs ----------
+    const form = document.getElementById("profile-form");
+    const saveBtn = document.getElementById("save-btn");
+    const errorBox = document.getElementById("alert-error");
+    const successBox = document.getElementById("alert-success");
+    const photoInput = document.getElementById("photo-input");
+    const photoPreview = document.getElementById("photo-preview");
+    const chipsContainer = document.getElementById("interests-chips");
+    const bioInput = document.getElementById("bio");
+    const bioCount = document.getElementById("bio-count");
+
+    let currentUser = null;
+    let selectedInterests = [];
+    let uploadedPhotoUrl = null;
+
+    // ---------- Helper functions ----------
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.classList.add("show");
+      successBox.classList.remove("show");
+    }
+
+    function showSuccess(msg) {
+      successBox.textContent = msg;
+      successBox.classList.add("show");
+      errorBox.classList.remove("show");
+    }
+
+    function clearAlerts() {
+      errorBox.classList.remove("show");
+      successBox.classList.remove("show");
+    }
+
+    // ---------- Render interest chips ----------
+    function renderChips() {
+      chipsContainer.innerHTML = INTEREST_OPTIONS.map(name => {
+        const active = selectedInterests.includes(name) ? "active" : "";
+        return `<span class="chip-toggle ${active}" data-interest="${name}">${name}</span>`;
+      }).join("");
+
+      // Attach click listeners
+      chipsContainer.querySelectorAll(".chip-toggle").forEach(chip => {
+        chip.addEventListener("click", () => {
+          const name = chip.dataset.interest;
+          if (selectedInterests.includes(name)) {
+            selectedInterests = selectedInterests.filter(i => i !== name);
+            chip.classList.remove("active");
+          } else {
+            selectedInterests.push(name);
+            chip.classList.add("active");
+          }
+        });
+      });
+    }
+
+    // ---------- Bio character counter ----------
+    bioInput.addEventListener("input", () => {
+      bioCount.textContent = bioInput.value.length;
+    });
+
+    // ---------- Photo upload ----------
+    photoInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Size check
+      if (file.size > 5 * 1024 * 1024) {
+        showError("Photo must be under 5MB.");
+        return;
+      }
+
+      // Show local preview immediately
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        photoPreview.innerHTML = `<img src="${ev.target.result}" alt="Preview">`;
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to Supabase
+      try {
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Uploading photo...";
+        uploadedPhotoUrl = await uploadProfilePhoto(file);
+        showSuccess("Photo uploaded. Click Save Profile to keep it.");
+      } catch (err) {
+        console.error(err);
+        showError("Photo upload failed: " + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save Profile";
+      }
+    });
+
+    // ---------- Load existing profile ----------
+    async function loadProfile() {
+      const result = await getMyProfile();
+      if (!result) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      currentUser = result.user;
+      const profile = result.profile;
+
+      if (!profile) {
+        // New user with no profile yet — just fill name from email
+        document.getElementById("name").value =
+          currentUser.email.split("@")[0];
+        renderChips();
+        return;
+      }
+
+      // Populate form with existing data
+      document.getElementById("name").value = profile.name || "";
+      document.getElementById("age").value = profile.age || "";
+      document.getElementById("gender").value = profile.gender || "";
+      document.getElementById("location").value = profile.location || "";
+      document.getElementById("country").value = profile.country || "";
+      document.getElementById("occupation").value = profile.occupation || "";
+      document.getElementById("looking_for").value = profile.looking_for || "";
+      bioInput.value = profile.bio || "";
+      bioCount.textContent = bioInput.value.length;
+
+      // Photo
+      if (profile.photo_url) {
+        photoPreview.innerHTML = `<img src="${profile.photo_url}" alt="Profile">`;
+        uploadedPhotoUrl = profile.photo_url;
+      }
+
+      // Interests
+      selectedInterests = Array.isArray(profile.interests) ? profile.interests : [];
+      renderChips();
+    }
+
+    // ---------- Save profile ----------
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearAlerts();
+
+      const name = document.getElementById("name").value.trim();
+      if (!name) {
+        showError("Name is required.");
+        return;
+      }
+
+      const ageValue = document.getElementById("age").value;
+      const age = ageValue ? parseInt(ageValue, 10) : null;
+
+      const fields = {
+        name,
+        age,
+        gender: document.getElementById("gender").value || null,
+        location: document.getElementById("location").value.trim() || null,
+        country: document.getElementById("country").value.trim() || null,
+        occupation: document.getElementById("occupation").value.trim() || null,
+        looking_for: document.getElementById("looking_for").value || null,
+        bio: bioInput.value.trim() || null,
+        interests: selectedInterests
+      };
+
+      if (uploadedPhotoUrl) {
+        fields.photo_url = uploadedPhotoUrl;
+      }
+
+      // Auto-generate slug
+      const { slugify } = await import("./js/profile.js");
+      fields.slug = slugify(name, age);
+
+      try {
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving...";
+
+        await updateMyProfile(fields);
+
+        showSuccess("Profile saved! Redirecting to dashboard...");
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1000);
+      } catch (err) {
+        console.error(err);
+        showError("Save failed: " + err.message);
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save Profile";
+      }
+    });
+
+    // ---------- Logout ----------
+    document.getElementById("logout-btn").addEventListener("click", (e) => {
+      e.preventDefault();
+      logout("index.html");
+    });
+
+    // ---------- Init ----------
+    (async () => {
+      const session = await requireAuth("login.html");
+      if (session) loadProfile();
+    })();
+  </script>
+
+</body>
+</html>
