@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel · SoulBridge Connection</title>
+  <meta name="theme-color" content="#c44569">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💞</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .admin-header {
+      background: linear-gradient(135deg, #1e1e2f, #2d1e2a);
+      color: #fff;
+      padding: 20px 0;
+      border-bottom: 3px solid #c44569;
+    }
+    .admin-header .shell {
+      display: flex;
+      justify-content: space-between;
+    
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .admin-header h1 {
+      color: #fff;
+      margin: 0;
+      font-size: 1.4rem;
+    }
+    .admin-header .admin-user {
+      font-size: 0.9rem;
+      color: #d9c6d0;
+    }
+    .admin-header a {
+      color: #ffc2d6;
+      font-size: 0.9rem;
+      margin-left: 16px;
+    }
+
+    .admin-tabs {
+      background: #fff;
+      border-bottom: 1px solid #f0e6ea;
+      padding: 0;
+      margin-bottom: 30px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .admin-tabs .shell {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      padding: 0 20px;
+    }
+    .admin-tab {
+      padding: 16px 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #7a5a6a;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .admin-tab:hover { color: #c44569; }
+    .admin-tab.active {
+      color: #c44569;
+      border-bottom-color: #c44569;
+    }
+
+    .admin-panel {
+      padding: 0 0 60px;
+    }
+    .admin-panel h2 {
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .admin-table th {
+      background: #f9f2f5;
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #7a5a6a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #f0e6ea;
+    }
+    .admin-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f0e6ea;
+      font-size: 0.9rem;
+      color: #1a1a2e;
+    }
+    .admin-table tr:last-child td {
+      border-bottom: none;
+    }
+    .admin-table tr:hover td {
+      background: #fdf8fa;
+    }
+
+    .member-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #f5e6ee;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #c44569;
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-verified { background: #d4edda; color: #155724; }
+    .badge-unverified { background: #f8d7da; color: #721c24; }
+    .badge-paid { background: #d4edda; color: #155724; }
+    .badge-pending { background: #fff3cd; color: #856404; }
+    .badge-refunded { background: #e2e3e5; color: #383d41; }
+    .badge-failed { background: #f8d7da; color: #721c24; }
+
+    .action-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      margin-right: 6px;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .action-edit {
+      background: rgba(196, 69, 105, 0.1);
+      color: #c44569;
+    }
+    .action-edit:hover { background: rgba(196, 69, 105, 0.2); }
+    .action-delete {
+      background: rgba(220, 53, 69, 0.1);
+      color: #dc3545;
+    }
+    .action-delete:hover { background: rgba(220, 53, 69, 0.2); }
+    .action-approve {
+      background: rgba(40, 167, 69, 0.1);
+      color: #28a745;
+    }
+    .action-approve:hover { background: rgba(40, 167, 69, 0.2); }
+    .action-deny {
+      background: rgba(220, 53, 69, 0.1);
+      color: #dc3545;
+    }
+    .action-deny:hover { background: rgba(220, 53, 69, 0.2); }
+
+    .member-form {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      max-width: 720px;
+    }
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 600px) {
+      .form-row-2 { grid-template-columns: 1fr; }
+      .admin-table { font-size: 0.85rem; }
+      .admin-table th, .admin-table td { padding: 8px 10px; }
+    }
+
+    .empty-row {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ADMIN HEADER -->
+  <header class="admin-header">
+    <div class="shell">
+      <div>
+        <h1>⚙️ Admin Panel</h1>
+        <div class="admin-user" id="admin-user">—</div>
+      </div>
+      <div>
+        <a href="dashboard.html">← Back to Site</a>
+        <a href="#" id="logout-btn">Log Out</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <div class="admin-tabs">
+    <div class="shell">
+      <div class="admin-tab active" data-tab="add">Add Member</div>
+      <div class="admin-tab" data-tab="members">Members</div>
+      <div class="admin-tab" data-tab="interests">Interests</div>
+      <div class="admin-tab" data-tab="payments">Payments</div>
+      <div class="admin-tab" data-tab="refunds">Refunds</div>
+      <div class="admin-tab" data-tab="notifications">Notifications</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <main class="admin-panel">
+    <div class="shell">
+
+      <!-- ADD MEMBER -->
+      <section id="tab-add">
+        <h2>Add a New Member</h2>
+        <div id="add-alert" class="alert alert-success" style="max-width:720px;"></div>
+
+        <form class="member-form" id="add-member-form">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input type="text" id="add-name" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label>Phone (WhatsApp) *</label>
+              <input type="tel" id="add-phone" class="form-input" placeholder="+254..." required>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Age</label>
+              <input type="number" id="add-age" class="form-input" min="18" max="120">
+            </div>
+            <div class="form-group">
+              <label>Gender</label>
+              <select id="add-gender" class="form-input">
+                <option value="">Select...</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="non-binary">Non-binary</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Location</label>
+              <input type="text" id="add-location" class="form-input" placeholder="City">
+            </div>
+            <div class="form-group">
+              <label>Country</label>
+              <input type="text" id="add-country" class="form-input" placeholder="Country">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Occupation</label>
+              <input type="text" id="add-occupation" class="form-input">
+            </div>
+            <div class="form-group">
+              <label>Looking For</label>
+              <select id="add-looking" class="form-input">
+                <option value="">Select...</option>
+                <option value="Serious Relationship">Serious Relationship</option>
+                <option value="Marriage">Marriage</option>
+                <option value="Friendship">Friendship</option>
+                <option value="Companionship">Companionship</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Bio</label>
+            <textarea id="add-bio" class="form-input" rows="4" style="resize:vertical;"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Email (for account creation)</label>
+            <input type="email" id="add-email" class="form-input" placeholder="member@example.com">
+            <p style="font-size: 0.8rem; color: #999; margin-top: 4px;">
+              Optional. Used to match the member with an account if they sign up.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label>Photo</label>
+            <input type="file" id="add-photo" accept="image/*" class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="add-verified">
+              <span>Mark as Verified</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-full" id="add-submit">
+            Add Member
+          </button>
+        </form>
+      </section>
+
+      <!-- MEMBERS LIST -->
+      <section id="tab-members" style="display:none;">
+        <h2>All Members</h2>
+        <div id="members-loading">Loading...</div>
+        <div id="members-list" style="display:none;">
+          <table class="admin-table" id="members-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Location</th>
+                <th>Phone</th>
+                <th>Verified</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- INTERESTS -->
+      <section id="tab-interests" style="display:none;">
+        <h2>Interests Received</h2>
+        <div id="interests-loading">Loading...</div>
+        <div id="interests-list" style="display:none;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>From</th>
+                <th>To</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="interests-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- PAYMENTS -->
+      <section id="tab-payments" style="display:none;">
+        <h2>Payments</h2>
+        <div id="payments-loading">Loading...</div>
+        <div id="payments-list" style="display:none;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>User ID</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Reference</th>
+              </tr>
+            </thead>
+            <tbody id="payments-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- REFUNDS -->
+      <section id="tab-refunds" style="display:none;">
+        <h2>Refund Requests</h2>
+        <div id="refunds-loading">Loading...</div>
+        <div id="refunds-list" style="display:none;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>User ID</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="refunds-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- NOTIFICATIONS -->
+      <section id="tab-notifications" style="display:none;">
+        <h2>Notifications Log</h2>
+        <div id="notifications-loading">Loading...</div>
+        <div id="notifications-list" style="display:none;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Title</th>
+                <th>User</th>
+                <th>Read</th>
+              </tr>
+            </thead>
+            <tbody id="notifications-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ============================================================ -->
+  <!-- SCRIPT                                                        -->
+  <!-- ============================================================ -->
+  <script type="module">
+    import { requireAuth, logout } from "./js/auth.js";
+    import { supabase } from "./js/supabase.js";
+    import {
+      requireAdmin,
+      getAllProfilesForAdmin,
+      createMember,
+      updateMember,
+      deleteMember,
+      toggleVerified,
+      getAllInterests,
+      getAllPayments,
+      getRefundRequests,
+      markRefundProcessed,
+      denyRefund,
+      getAllNotifications,
+      uploadMemberPhoto
+    } from "./js/admin.js";
+
+    // ---------- Setup ----------
+    let currentUser = null;
+
+    function esc(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // ---------- Init ----------
+    (async () => {
+      const session = await requireAuth("login.html");
+      if (!session) return;
+
+      const isAdmin = await requireAdmin("dashboard.html");
+      if (!isAdmin) return;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      currentUser = user;
+      document.getElementById("admin-user").textContent = user.email;
+    })();
+
+    // ---------- Logout ----------
+    document.getElementById("logout-btn").addEventListener("click", (e) => {
+      e.preventDefault();
+      logout("index.html");
+    });
+
+    // ---------- Tabs ----------
+    document.querySelectorAll(".admin-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".admin-panel > .shell > section").forEach(s => s.style.display = "none");
+        tab.classList.add("active");
+        const target = document.getElementById("tab-" + tab.dataset.tab);
+        if (target) target.style.display = "block";
+
+        // Lazy load data
+        if (tab.dataset.tab === "members") loadMembers();
+        if (tab.dataset.tab === "interests") loadInterests();
+        if (tab.dataset.tab === "payments") loadPayments();
+        if (tab.dataset.tab === "refunds") loadRefunds();
+        if (tab.dataset.tab === "notifications") loadNotifications();
+      });
+    });
+
+    // ---------- Add Member ----------
+    document.getElementById("add-member-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("add-submit");
+      const alertBox = document.getElementById("add-alert");
+
+      const name = document.getElementById("add-name").value.trim();
+      const phone = document.getElementById("add-phone").value.trim();
+
+      if (!name || !phone) {
+        alertBox.className = "alert alert-error show";
+        alertBox.textContent = "Name and phone are required.";
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        btn.textContent = "Creating...";
+
+        // 1. Create a fake user ID (admin-added members won't have auth accounts initially)
+        //    We'll use a generated UUID.
+        const memberId = crypto.randomUUID();
+
+        // 2. Upload photo if provided
+        let photoUrl = null;
+        const photoInput = document.getElementById("add-photo");
+        if (photoInput.files && photoInput.files[0]) {
+          photoUrl = await uploadMemberPhoto(photoInput.files[0], memberId);
+        }
+
+        // 3. Build slug
+        const age = document.getElementById("add-age").value;
+        const slug = name.toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          + (age ? "-" + age : "");
+
+        // 4. Insert profile
+        const fields = {
+          id: memberId,
+          name,
+          phone,
+          age: age ? parseInt(age, 10) : null,
+          gender: document.getElementById("add-gender").value || null,
+          location: document.getElementById("add-location").value.trim() || null,
+          country: document.getElementById("add-country").value.trim() || null,
+          occupation: document.getElementById("add-occupation").value.trim() || null,
+          looking_for: document.getElementById("add-looking").value || null,
+          bio: document.getElementById("add-bio").value.trim() || null,
+          photo_url: photoUrl,
+          verified: document.getElementById("add-verified").checked,
+          email: document.getElementById("add-email").value.trim() || null,
+          slug
+        };
+
+        await createMember(fields);
+
+        alertBox.className = "alert alert-success show";
+        alertBox.textContent = "✅ Member added successfully!";
+
+        document.getElementById("add-member-form").reset();
+        btn.disabled = false;
+        btn.textContent = "Add Member";
+      } catch (err) {
+        console.error(err);
+        alertBox.className = "alert alert-error show";
+        alertBox.textContent = "Failed: " + err.message;
+        btn.disabled = false;
+        btn.textContent = "Add Member";
+      }
+    });
+
+    // ---------- Load Members ----------
+    async function loadMembers() {
+      const loading = document.getElementById("members-loading");
+      const list = document.getElementById("members-list");
+      loading.style.display = "block";
+      list.style.display = "none";
+
+      try {
+        const members = await getAllProfilesForAdmin();
+        const tbody = document.querySelector("#members-table tbody");
+
+        if (!members || members.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" class="empty-row">No members yet.</td></tr>`;
+        } else {
+          tbody.innerHTML = members.map(m => `
+            <tr>
+              <td>
+                ${m.photo_url
+                  ? `<img src="${esc(m.photo_url)}" class="member-thumb" alt="">`
+                  : `<span class="member-thumb">${esc((m.name || "?")[0])}</span>`}
+              </td>
+              <td>${esc(m.name || "—")}</td>
+              <td>${esc(m.age || "—")}</td>
+              <td>${esc(m.location || "—")}</td>
+              <td>${esc(m.phone || "—")}</td>
+              <td>
+                <span class="badge ${m.verified ? 'badge-verified' : 'badge-unverified'}">
+                  ${m.verified ? 'Verified' : 'Unverified'}
+                </span>
+              </td>
+              <td>
+                <button class="action-btn action-edit" data-verify="${m.id}" data-current="${m.verified}">
+                  ${m.verified ? 'Unverify' : 'Verify'}
+                </button>
+                <button class="action-btn action-delete" data-delete="${m.id}">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          `).join("");
+        }
+
+        // Wire up buttons
+        tbody.querySelectorAll("[data-verify]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const id = btn.dataset.verify;
+            const current = btn.dataset.current === "true";
+            try {
+              await toggleVerified(id, current);
+              loadMembers();
+            } catch (err) {
+              alert("Failed: " + err.message);
+            }
+          });
+        });
+
+        tbody.querySelectorAll("[data-delete]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const id = btn.dataset.delete;
+            if (!confirm("Delete this member permanently?")) return;
+            try {
+              await deleteMember(id);
+              loadMembers();
+            } catch (err) {
+              alert("Failed: " + err.message);
+            }
+          });
+        });
+
+        loading.style.display = "none";
+        list.style.display = "block";
+      } catch (err) {
+        loading.textContent = "Error: " + err.message;
+      }
+    }
+
+    // ---------- Load Interests ----------
+    async function loadInterests() {
+      const loading = document.getElementById("interests-loading");
+      const list = document.getElementById("interests-list");
+      loading.style.display = "block";
+      list.style.display = "none";
+
+      try {
+        const items = await getAllInterests();
+        const tbody = document.getElementById("interests-tbody");
+
+        if (!items || items.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="empty-row">No interests yet.</td></tr>`;
+        } else {
+          tbody.innerHTML = items.map(i => `
+            <tr>
+              <td>${esc(i.from_user?.name || i.from_user_id?.slice(0, 8) || "—")}</td>
+              <td>${esc(i.to_user?.name || i.to_user_id?.slice(0, 8) || "—")}</td>
+              <td>${esc(i.status || "—")}</td>
+              <td>${new Date(i.created_at).toLocaleDateString()}</td>
+            </tr>
+          `).join("");
+        }
+
+        loading.style.display = "none";
+        list.style.display = "block";
+      } catch (err) {
+        loading.textContent = "Error: " + err.message;
+      }
+    }
+
+    // ---------- Load Payments ----------
+    async function loadPayments() {
+      const loading = document.getElementById("payments-loading");
+      const list = document.getElementById("payments-list");
+      loading.style.display = "block";
+      list.style.display = "none";
+
+      try {
+        const items = await getAllPayments();
+        const tbody = document.getElementById("payments-tbody");
+
+        if (!items || items.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="empty-row">No payments yet.</td></tr>`;
+        } else {
+          tbody.innerHTML = items.map(p => `
+            <tr>
+              <td>${new Date(p.created_at).toLocaleDateString()}</td>
+              <td>${esc(p.user_id?.slice(0, 8) || "—")}</td>
+              <td>${esc(p.currency)} ${(p.amount / 100).toFixed(2)}</td>
+              <td><span class="badge badge-${esc(p.status)}">${esc(p.status)}</span></td>
+              <td>${esc(p.paystack_reference?.slice(0, 12) || "—")}</td>
+            </tr>
+          `).join("");
+        }
+
+        loading.style.display = "none";
+        list.style.display = "block";
+      } catch (err) {
+        loading.textContent = "Error: " + err.message;
+      }
+    }
+
+    // ---------- Load Refunds ----------
+    async function loadRefunds() {
+      const loading = document.getElementById("refunds-loading");
+      const list = document.getElementById("refunds-list");
+      loading.style.display = "block";
+      list.style.display = "none";
+
+      try {
+        const items = await getRefundRequests();
+        const tbody = document.getElementById("refunds-tbody");
+
+        if (!items || items.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="empty-row">No pending refunds.</td></tr>`;
+        } else {
+          tbody.innerHTML = items.map(r => `
+            <tr>
+              <td>${new Date(r.created_at).toLocaleDateString()}</td>
+              <td>${esc(r.user_id?.slice(0, 8) || "—")}</td>
+              <td>${esc(r.reason || "—")}</td>
+              <td><span class="badge badge-${esc(r.status)}">${esc(r.status)}</span></td>
+              <td>
+                <button class="action-btn action-approve" data-approve="${r.id}">Approve</button>
+                <button class="action-btn action-deny" data-deny="${r.id}">Deny</button>
+              </td>
+            </tr>
+          `).join("");
+        }
+
+        tbody.querySelectorAll("[data-approve]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            if (!confirm("Mark this refund as processed? (Remember to refund via Paystack dashboard)")) return;
+            await markRefundProcessed(btn.dataset.approve, "Approved via admin panel");
+            loadRefunds();
+          });
+        });
+
+        tbody.querySelectorAll("[data-deny]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const note = prompt("Reason for denying (optional):") || "";
+            await denyRefund(btn.dataset.deny, note);
+            loadRefunds();
+          });
+        });
+
+        loading.style.display = "none";
+        list.style.display = "block";
+      } catch (err) {
+        loading.textContent = "Error: " + err.message;
+      }
+    }
+
+    // ---------- Load Notifications ----------
+    async function loadNotifications() {
+      const loading = document.getElementById("notifications-loading");
+      const list = document.getElementById("notifications-list");
+      loading.style.display = "block";
+      list.style.display = "none";
+
+      try {
+        const items = await getAllNotifications();
+        const tbody = document.getElementById("notifications-tbody");
+
+        if (!items || items.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="empty-row">No notifications.</td></tr>`;
+        } else {
+          tbody.innerHTML = items.map(n => `
+            <tr>
+              <td>${new Date(n.created_at).toLocaleDateString()}</td>
+              <td>${esc(n.type)}</td>
+              <td>${esc(n.title)}</td>
+              <td>${esc(n.user_id?.slice(0, 8) || "—")}</td>
+              <td>${n.read ? "✓" : "—"}</td>
+            </tr>
+          `).join("");
+        }
+
+        loading.style.display = "none";
+        list.style.display = "block";
+      } catch (err) {
+        loading.textContent = "Error: " + err.message;
+      }
+    }
+  </script>
+
+</body>
+</html>
