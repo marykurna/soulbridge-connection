@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interests · SoulBridge Connection</title>
+  <meta name="theme-color" content="#c44569">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💞</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .interests-wrap {
+      max-width: 720px;
+      margin: 40px auto;
+    }
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: #fff;
+      border-radius: 14px;
+      padding: 6px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #7a5a6a;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab:hover { background: #fdf5f9; color: #c44569; }
+    .tab.active {
+      background: #c44569;
+      color: #fff;
+    }
+    .tab .badge-count {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.3);
+      padding: 2px 8px;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      margin-left: 6px;
+    }
+    .tab:not(.active) .badge-count {
+      background: rgba(196, 69, 105, 0.15);
+      color: #c44569;
+    }
+
+    .interest-card {
+      display: flex;
+      gap: 16px;
+      padding: 18px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px -8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 14px;
+      border: 1px solid #f5e6ee;
+      align-items: center;
+      transition: transform 0.15s;
+    }
+    .interest-card:hover { transform: translateY(-2px); }
+
+    .interest-photo {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #f7ecf2, #ead8e2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: #9b6f86;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(196, 69, 105, 0.15);
+    }
+    .interest-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .interest-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .interest-name {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 2px;
+    }
+    .interest-meta {
+      font-size: 0.85rem;
+      color: #7a5a6a;
+      margin-bottom: 6px;
+    }
+    .interest-bio {
+      font-size: 0.85rem;
+      color: #4a4a5a;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .interest-actions {
+      display: flex;
+      gap: 8px;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .interest-actions .btn {
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      min-width: 90px;
+    }
+    .btn-success {
+      background: #28a745;
+    }
+    .btn-success:hover { background: #218838; }
+    .btn-danger {
+      background: #dc3545;
+    }
+    .btn-danger:hover { background: #c82333; }
+    .status-pill {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-matched { background: #d4edda; color: #155724; }
+    .status-declined { background: #f8d7da; color: #721c24; }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #7a5a6a;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 6px 20px -8px rgba(0, 0, 0, 0.08);
+    }
+    .empty-state .icon {
+      font-size: 3.5rem;
+      margin-bottom: 12px;
+    }
+    .empty-state h3 {
+      margin-bottom: 6px;
+      color: #1a1a2e;
+    }
+    .loading-msg {
+      text-align: center;
+      padding: 40px;
+      color: #7a5a6a;
+    }
+
+    @media (max-width: 500px) {
+      .interest-card {
+        flex-direction: column;
+        text-align: center;
+      }
+      .interest-actions {
+        flex-direction: row;
+        width: 100%;
+      }
+      .interest-actions .btn { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="shell">
+      <a href="index.html" class="logo">SoulBridge Connection</a>
+      <nav class="site-nav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="members.html">Browse</a>
+        <a href="#" id="logout-btn">Log Out</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+    <div class="shell">
+      <div class="interests-wrap">
+
+        <h1 style="text-align: center; margin-bottom: 8px;">Your Interests</h1>
+        <p style="text-align: center; color: #7a5a6a; margin-bottom: 32px;">
+          Manage who you've connected with.
+        </p>
+
+        <!-- TABS -->
+        <div class="tabs">
+          <div class="tab active" data-tab="received">
+            Received <span class="badge-count" id="count-received">0</span>
+          </div>
+          <div class="tab" data-tab="sent">
+            Sent <span class="badge-count" id="count-sent">0</span>
+          </div>
+        </div>
+
+        <!-- RECEIVED -->
+        <div id="panel-received">
+          <div class="loading-msg" id="loading-received">Loading interests...</div>
+          <div id="list-received"></div>
+        </div>
+
+        <!-- SENT -->
+        <div id="panel-sent" style="display: none;">
+          <div class="loading-msg" id="loading-sent">Loading interests...</div>
+          <div id="list-sent"></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="shell">
+      <p style="margin: 0;">&copy; 2026 SoulBridge Connection · Connecting hearts worldwide.</p>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- SCRIPT                                                        -->
+  <!-- ============================================================ -->
+  <script type="module">
+    import { requireAuth, logout } from "./js/auth.js";
+    import {
+      getInterestsReceived,
+      getInterestsSent,
+      acceptInterest,
+      declineInterest
+    } from "./js/interest.js";
+
+    function esc(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function profileUrl(profile) {
+      if (!profile) return "#";
+      if (profile.slug) return `profile.html?slug=${encodeURIComponent(profile.slug)}`;
+      return `profile.html?id=${profile.id}`;
+    }
+
+    function avatarHtml(profile) {
+      if (profile && profile.photo_url) {
+        return `<img src="${esc(profile.photo_url)}" alt="${esc(profile.name || "")}">`;
+      }
+      return "👤";
+    }
+
+    // ---------- Render received list ----------
+    function renderReceived(items) {
+      const list = document.getElementById("list-received");
+      const loading = document.getElementById("loading-received");
+      loading.style.display = "none";
+
+      if (!items || items.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">💌</div>
+            <h3>No interests yet</h3>
+            <p>When someone is interested in you, they'll appear here.</p>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = items.map(i => {
+        const p = i.from_profile || {};
+        const name = p.name || "Member";
+        const age = p.age ? `, ${p.age}` : "";
+        const location = p.location || "";
+        const bio = p.bio || "";
+
+        let actions = "";
+        if (i.status === "pending") {
+          actions = `
+            <button class="btn btn-success" data-accept="${i.id}">Accept</button>
+            <button class="btn btn-danger" data-decline="${i.id}">Decline</button>`;
+        } else {
+          actions = `<span class="status-pill status-${i.status}">${i.status}</span>`;
+        }
+
+        return `
+          <div class="interest-card">
+            <a href="${profileUrl(p)}" class="interest-photo">${avatarHtml(p)}</a>
+            <div class="interest-info">
+              <div class="interest-name">${esc(name)}${esc(age)}</div>
+              ${location ? `<div class="interest-meta">📍 ${esc(location)}</div>` : ""}
+              ${bio ? `<div class="interest-bio">${esc(bio)}</div>` : ""}
+            </div>
+            <div class="interest-actions">${actions}</div>
+          </div>`;
+      }).join("");
+
+      // Wire up buttons
+      list.querySelectorAll("[data-accept]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          if (!confirm("Accept this interest? You'll be able to message them.")) return;
+          try {
+            btn.disabled = true;
+            btn.textContent = "...";
+            await acceptInterest(btn.dataset.accept);
+            loadAll(); // reload both lists
+          } catch (err) {
+            alert("Failed: " + err.message);
+            btn.disabled = false;
+          }
+        });
+      });
+
+      list.querySelectorAll("[data-decline]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          if (!confirm("Decline this interest?")) return;
+          try {
+            btn.disabled = true;
+            btn.textContent = "...";
+            await declineInterest(btn.dataset.decline);
+            loadAll();
+          } catch (err) {
+            alert("Failed: " + err.message);
+            btn.disabled = false;
+          }
+        });
+      });
+    }
+
+    // ---------- Render sent list ----------
+    function renderSent(items) {
+      const list = document.getElementById("list-sent");
+      const loading = document.getElementById("loading-sent");
+      loading.style.display = "none";
+
+      if (!items || items.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">📮</div>
+            <h3>No interests sent</h3>
+            <p>Browse members and tap "I'm Interested" to start.</p>
+            <a href="members.html" class="btn" style="margin-top: 16px;">Browse Members</a>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = items.map(i => {
+        const p = i.to_profile || {};
+        const name = p.name || "Member";
+        const age = p.age ? `, ${p.age}` : "";
+        const location = p.location || "";
+
+        return `
+          <div class="interest-card">
+            <a href="${profileUrl(p)}" class="interest-photo">${avatarHtml(p)}</a>
+            <div class="interest-info">
+              <div class="interest-name">${esc(name)}${esc(age)}</div>
+              ${location ? `<div class="interest-meta">📍 ${esc(location)}</div>` : ""}
+            </div>
+            <div class="interest-actions">
+              <span class="status-pill status-${i.status}">${i.status}</span>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    // ---------- Load both lists ----------
+    async function loadAll() {
+      const [received, sent] = await Promise.all([
+        getInterestsReceived(),
+        getInterestsSent()
+      ]);
+
+      document.getElementById("count-received").textContent =
+        received.filter(i => i.status === "pending").length;
+      document.getElementById("count-sent").textContent = sent.length;
+
+      renderReceived(received);
+      renderSent(sent);
+    }
+
+    // ---------- Tabs ----------
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll("#panel-received, #panel-sent").forEach(p => p.style.display = "none");
+        tab.classList.add("active");
+        document.getElementById("panel-" + tab.dataset.tab).style.display = "block";
+      });
+    });
+
+    // ---------- Logout ----------
+    document.getElementById("logout-btn").addEventListener("click", (e) => {
+      e.preventDefault();
+      logout("index.html");
+    });
+
+    // ---------- Init ----------
+    (async () => {
+      const session = await requireAuth("login.html");
+      if (session) loadAll();
+    })();
+  </script>
+
+</body>
+</html>

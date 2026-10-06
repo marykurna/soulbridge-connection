@@ -252,14 +252,22 @@
             <div class="interests-chips" id="info-interests"></div>
           </div>
 
-          <!-- CTA -->
+                    <!-- CTA -->
           <div class="section" style="text-align:center; padding-top: 32px;">
-            <button class="btn btn-full" id="connect-btn" style="max-width: 300px; margin: 0 auto;">
-              💬 Request Connection
+            <div id="interest-status"></div>
+
+            <button class="btn btn-full" id="interest-btn" style="max-width: 300px; margin: 0 auto;">
+              💕 I'm Interested
             </button>
-            <p style="font-size: 0.85rem; color: #999; margin-top: 12px;">
-              Messaging coming soon
-            </p>
+
+            <div id="messaging-block" style="display:none; margin-top: 24px;">
+              <p style="font-size: 0.9rem; color: #7a5a6a; margin-bottom: 12px;">
+                You've matched! Send a message to break the ice.
+              </p>
+              <a href="#" id="chat-btn" class="btn btn-full" style="max-width: 300px; margin: 0 auto; background: #28a745;">
+                💬 Open Chat
+              </a>
+            </div>
           </div>
 
         </div>
@@ -280,6 +288,7 @@
   <!-- ============================================================ -->
   <script type="module">
     import { getProfileById, getProfileBySlug } from "./js/profile.js";
+    import { sendInterest, hasSentInterest } from "./js/interest.js";
 
     function escapeHtml(str) {
       if (!str) return "";
@@ -370,12 +379,66 @@
       document.getElementById("error-state").style.display = "none";
       document.getElementById("content").style.display = "block";
 
-      // Connect button — stub for now
-      document.getElementById("connect-btn").addEventListener("click", () => {
-        alert("Messaging coming soon! We'll notify you when this feature is ready.");
-      });
+            // Setup interest button
+      setupInterestButton(profile.id);
     }
 
+    // ============================================================
+    // INTEREST BUTTON LOGIC
+    // ============================================================
+    async function setupInterestButton(memberId) {
+      const btn = document.getElementById("interest-btn");
+      const statusEl = document.getElementById("interest-status");
+      const messagingBlock = document.getElementById("messaging-block");
+      const chatBtn = document.getElementById("chat-btn");
+
+      if (!btn) return;
+
+      // Check if interest already exists
+      const existing = await hasSentInterest(memberId);
+
+      if (existing) {
+        if (existing.status === "matched") {
+          // Match! Show chat button
+          btn.style.display = "none";
+          messagingBlock.style.display = "block";
+          chatBtn.href = `chat.html?with=${memberId}`;
+        } else if (existing.status === "declined") {
+          btn.disabled = true;
+          btn.textContent = "Interest declined";
+          btn.style.background = "#ccc";
+          btn.style.cursor = "not-allowed";
+          statusEl.innerHTML = `<p style="color:#dc3545;font-size:0.9rem;margin-bottom:12px;">This member declined your interest.</p>`;
+        } else {
+          // Pending
+          btn.disabled = true;
+          btn.textContent = "⏳ Interest sent";
+          btn.style.background = "#adb5bd";
+          statusEl.innerHTML = `<p style="color:#7a5a6a;font-size:0.9rem;margin-bottom:12px;">Waiting for them to respond.</p>`;
+        }
+        return;
+      }
+
+      // Not yet sent — wire up the button
+      btn.addEventListener("click", async () => {
+        if (!confirm("Send an interest to this member?")) return;
+
+        btn.disabled = true;
+        btn.textContent = "Sending...";
+
+        try {
+          await sendInterest(memberId);
+          btn.textContent = "✅ Interest sent";
+          btn.style.background = "#28a745";
+          statusEl.innerHTML = `<p style="color:#28a745;font-size:0.9rem;margin-bottom:12px;">Your interest was sent! They'll be notified.</p>`;
+        } catch (err) {
+          console.error(err);
+          alert(err.message || "Could not send interest.");
+          btn.disabled = false;
+          btn.textContent = "💕 I'm Interested";
+        }
+      });
+    }
     async function init() {
       const params = new URLSearchParams(window.location.search);
       const id = params.get("id");
